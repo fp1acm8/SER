@@ -1,11 +1,17 @@
-import pandas as pd
+''' DATA AUGMENTATION
+    Data augmentation in data analysis are techniques used to increase the amount of data by adding 
+    slightly modified copies of already existing data or newly created synthetic data from existing data.
+
+    Techniques used:
+    >   noise injection
+    >   shifting time
+    >   changing pitch
+    >   changing speed
+'''
+
 import numpy as np
 
 import librosa
-
-''' To generate syntactic data for audio, we can apply noise injection, shifting time, changing pitch and speed.
-    -> numpy provides an easy way to handle noise injection and shifting time
-    -> librosa helps to manipulate pitch and speed '''
 
 def noise(data):
     noise_amp = 0.035*np.random.uniform()*np.amax(data)
@@ -21,4 +27,3 @@ def shift(data):
 
 def pitch(data, sampling_rate, pitch_factor=0.7):
     return librosa.effects.pitch_shift(data, sampling_rate, pitch_factor)
-
