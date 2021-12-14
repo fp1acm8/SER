@@ -2,7 +2,7 @@
 > **Speech Emotion Recognition** (SER) can be defined as extraction of the emotional state of the speaker from his or her speech signal
 
 The project aims to develop a Speech Emotion Recognition system starting from EMOVO Corpus audio samples (italian language).\
-The model used is an MLP implemented in Keras.\
+The model used is an MLP implemented in Keras.
 
 The goal of this repository is to create a starting base that can be implemented with the use of other datasets and other deep architectures.
 
