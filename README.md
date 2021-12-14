@@ -28,7 +28,7 @@ The goal of this repository is to create a starting base that can be implemented
 ├── train.py                                  // training the model
 └── predict.py                                // making predictions
 ```
-## Usage
+## Requirements
 Install dependencies:
 ```pip install -r requirements.txt```
 
@@ -44,3 +44,9 @@ Train the MLP classifier defined in [`modules/mlp.py`](https://github.com/fp1acm
 Make predictions on data never seen by the model. Summary data of the predictions made can be found in the folder [`out/`](https://github.com/fp1acm8/SER/blob/main/out/).
 
 ---
+## Utility functions
+
+---
+## Notes
+* > Despite the promising results, the work can be improved by increasing the number of audio samples to train SER models. Having more data could allow you to train DNN able to perform feature extraction automatically (i.e., CNN and LSTM).
+* > A possible business application of SER system was proposed in my master thesis [*"A Speech Emotion Recognition system to perform Sentiment Analysis in a business context"*](https://github.com/fp1acm8/SER/blob/main/docs/SER_businesscase.pdf).
