@@ -4,18 +4,13 @@ import tensorflow as tf
 import os
 import pickle
 
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.metrics import confusion_matrix, classification_report
-
-import joblib
-from joblib import dump, load
 
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Conv1D, MaxPooling1D, Flatten, Dropout, BatchNormalization
 from keras.callbacks.callbacks import EarlyStopping
 from keras.utils import np_utils
-
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -64,18 +59,21 @@ class MLPClassifier:
         return scores
 
 
-    def predict(self, x_test, encoder):
-
-        y = self.model.predict(x_test)
+    def predict(self, X, encoder, save: bool=True):
+        y = self.model.predict(X)
         y_pred = encoder.inverse_transform(y)
-
+        if save: 
+            y_pred_df = pd.DataFrame(y_pred)
+            y_pred_df.to_csv('out/predictions.csv', index=False)
+        
         return y_pred
 
 
-    def confusion_matrix(self, x_test, y_test, encoder, save: bool=True):
+    def confusion_matrix(self, X, Y, encoder, save: bool=True):
         
-        y_pred = self.predict(self, x_test, encoder)
-        cm = confusion_matrix(y_test, y_pred, normalize='pred')
+        y_pred = self.predict(X, encoder)
+        Y = encoder.inverse_transform(Y)
+        cm = confusion_matrix(Y, y_pred, normalize='pred')
         plt.figure(figsize = (12, 10))
         cm = pd.DataFrame(cm , index = [i for i in encoder.categories_] , columns = [i for i in encoder.categories_])
         sns.heatmap(cm, linecolor='white', cmap='rocket_r', linewidth=1, annot=True, fmt='.1%')
@@ -83,18 +81,17 @@ class MLPClassifier:
         plt.xlabel('Predicted Labels', size=14)
         plt.ylabel('Actual Labels', size=14)
         plt.show()
-        if save:
-            plt.savefig('out/figures/confusion_matrix.png')
+        if save==True:
+            plt.savefig('out/confusion_matrix.png')
 
 
-    def classification_report(self, x_test, y_test, encoder, save: bool=True):
-        y_pred = self.predict(self, x_test, encoder)
-        
-        report = classification_report(y_test, y_pred, output_dict=True)
-        df = pd.DataFrame(report).transpose()
+    def classification_report(self, X, Y, encoder, save: bool=True):
+        y_pred = self.predict(X, encoder)
+        Y = encoder.inverse_transform(Y)
+        report = classification_report(Y, y_pred, output_dict=True)
         if save:
-            df.to_csv('out/classification_report.csv', index = False)
-        return df
+            df = pd.DataFrame(report).transpose()
+            df.to_csv('out/classification_report.csv', index=True)
 
 
     def save(self, path: str, name: str) -> None:
@@ -105,6 +102,7 @@ class MLPClassifier:
         """
         save_path = os.path.abspath(os.path.join(path, name + '.m'))
         pickle.dump(self, open(save_path, "wb"))
+
 
     @classmethod
     def load(cls, path: str, name: str):
