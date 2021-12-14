@@ -39,7 +39,7 @@ Install dependencies:
 1. [`preprocessing.py`](https://github.com/fp1acm8/SER/blob/main/preprocessing.py):\
 Load the dataset and extract the audio features through the `librosa` library. Synthetic data were created in order to increase the number of audio samples through data augmentation techniques.
 2. [`train.py`](https://github.com/fp1acm8/SER/blob/main/train.py):\
-Train the MLP classifier defined in [`modules/mlp.py`](https://github.com/fp1acm8/SER/blob/main/models/mlp.py). But first the data must be prepared so that it can be input to the neural network. To do this, a special function called [`data_preparation ()`](https://github.com/fp1acm8/SER/blob/main/modules/data_preparation.py) has been created.
+Train the MLP classifier defined in [`modules/mlp.py`](https://github.com/fp1acm8/SER/blob/main/models/mlp.py). But first the data must be prepared so that it can be input to the neural network. To do this, a special function called [`data_preparation()`](https://github.com/fp1acm8/SER/blob/main/modules/data_preparation.py) has been created.
 3. [`predict.py`](https://github.com/fp1acm8/SER/blob/main/predict.py):\
 Make predictions on data never seen by the model. Summary data of the predictions made can be found in the folder [`out/`](https://github.com/fp1acm8/SER/blob/main/out/).
 
