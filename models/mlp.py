@@ -26,7 +26,8 @@ class MLPClassifier:
 
 
     def build(self):
-
+        ''' Define model architecture using Keras 
+        '''
         self.model = keras.models.Sequential([
                 keras.layers.Dense(39,input_shape=self.input_shape,activation='relu'),
                 keras.layers.Dense(64, activation='relu'),
@@ -37,7 +38,16 @@ class MLPClassifier:
 
 
     def fit(self, X, Y, batch_size=32, epochs=100, val_data=None, callbacks=False):
-
+        ''' Trains the model for a fixed number of epochs (iterations on a dataset).
+            -----------------------------------------------------------------------
+            Args:
+            > X: Input data
+            > Y: Target data
+            > batch_size: Integer or None. Number of samples per gradient update. If unspecified, batch_size will default to 32.
+            > epochs: Integer. Number of epochs to train the model. An epoch is an iteration over the entire x and y data provided. If unspecified, epochs will default to 100. 
+            > val_data: Data on which to evaluate the loss and any model metrics at the end of each epoch. The model will not be trained on this data. A tuple (x_val, y_val) of Numpy arrays or tensors.
+            > callbacks: If True, early stopping [EarlyStopping(patience=10, min_delta=0.001, restore_best_weights=True)] is applied during training.
+        '''
         early_stopping = keras.callbacks.EarlyStopping(patience=10, min_delta=0.001, restore_best_weights=True)
 
         if self.model is not None:
@@ -55,11 +65,24 @@ class MLPClassifier:
 
 
     def eval(self, X, Y):
+         ''' Returns the loss value & metrics values for the model in test mode.
+            -----------------------------------------------------------------------
+            Args:
+            > X: Input data
+            > Y: Target data
+        '''
         scores = self.model.evaluate(x=X, y=Y, verbose=0)
         return scores
 
 
     def predict(self, X, encoder, save: bool=True):
+          ''' Generates output predictions for the input samples.
+            -----------------------------------------------------------------------
+            Args:
+            > X: Input samples
+            > encoder: object used to encode categorical features
+            > save: if True the predictions are saved as 'out/predictions.csv'
+        '''
         y = self.model.predict(X)
         y_pred = encoder.inverse_transform(y)
         if save: 
@@ -70,7 +93,14 @@ class MLPClassifier:
 
 
     def confusion_matrix(self, X, Y, encoder, save: bool=True):
-        
+        ''' Compute confusion matrix to evaluate the accuracy of a classification.
+            -----------------------------------------------------------------------
+            Args:
+            > X: Input samples
+            > Y: Ground truth (correct) target values.
+            > encoder: object used to encode categorical features
+            > save: if True the figure is saved as 'out/confusion_matrix.png'
+        '''
         y_pred = self.predict(X, encoder)
         Y = encoder.inverse_transform(Y)
         cm = confusion_matrix(Y, y_pred, normalize='pred')
@@ -86,6 +116,14 @@ class MLPClassifier:
 
 
     def classification_report(self, X, Y, encoder, save: bool=True):
+        ''' Build a report showing the main classification metrics.
+            -----------------------------------------------------------------------
+            Args:
+            > X: Input samples
+            > Y: Ground truth (correct) target values.
+            > encoder: object used to encode categorical features
+            > save: if True the report is saved as 'out/classification_report.csv'
+        '''
         y_pred = self.predict(X, encoder)
         Y = encoder.inverse_transform(Y)
         report = classification_report(Y, y_pred, output_dict=True)
@@ -95,11 +133,11 @@ class MLPClassifier:
 
 
     def save(self, path: str, name: str) -> None:
-        """
+        '''
         Args:
-            path (str):
-            name (str):
-        """
+            path (str): path
+            name (str): file name
+        '''
         save_path = os.path.abspath(os.path.join(path, name + '.m'))
         pickle.dump(self, open(save_path, "wb"))
 
@@ -108,8 +146,8 @@ class MLPClassifier:
     def load(cls, path: str, name: str):
         '''
         Args:
-            path (str): 
-            name (str): 
+            path (str): path
+            name (str): file name
         '''
         model_path = os.path.abspath(os.path.join(path, name + '.m'))
         with open(model_path, 'rb') as pickle_file:
