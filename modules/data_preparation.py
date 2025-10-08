@@ -61,26 +61,26 @@ def get_features(path, noise: bool, stretch_pitch: bool, shift: bool):
 
     # feature extraction without augmentation
     res1 = extract_features(y,sr)
-    result = np.array(res1)
+    result = np.atleast_2d(res1)
 
     # data with noise
     if (noise==True):
         noise_data = da.noise(y)
         res2 = extract_features(noise_data, sr)
-        result = np.vstack((result, res2)) # stacking vertically
+        result = np.vstack((result, np.atleast_2d(res2))) # stacking vertically
 
     # data with stretching and pitching
     if (stretch_pitch==True):
         new_data = da.stretch(y)
         data_stretch_pitch = da.pitch(new_data, sr)
         res3 = extract_features(data_stretch_pitch, sr)
-        result = np.vstack((result, res3)) # stacking vertically
+        result = np.vstack((result, np.atleast_2d(res3))) # stacking vertically
 
     # data with shift
     if (shift==True):
         shift_data = da.stretch(y)
         res4 = extract_features(shift_data, sr)
-        result = np.vstack((result, res4)) # stacking vertically
+        result = np.vstack((result, np.atleast_2d(res4))) # stacking vertically
 
     return result
 
@@ -96,8 +96,8 @@ def store_features(audio_path: pd.core.frame.DataFrame, emotion: pd.core.frame.D
         # extracting features
         features = get_features(path, noise, stretch_pitch, shift)
         # storing the results and the corresponding emotion
-        for ele in features:
-            X.append(ele)
+        for sample_features in features:
+            X.append(sample_features)
             Y.append(emotion)
 
     # Store results as DataFrame
