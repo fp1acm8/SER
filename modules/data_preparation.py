@@ -9,6 +9,8 @@ The functions are:
     > data_preparation()
     > label_manager()
 '''
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -106,59 +108,70 @@ def store_features(audio_path: pd.core.frame.DataFrame, emotion: pd.core.frame.D
 
     return features_df
 
-def data_preparation(data: pd.core.frame.DataFrame, Y_col: int=-1, 
+def data_preparation(data: pd.core.frame.DataFrame, Y_col: int=-1,
                     standard_scaler: bool=True, one_hot_encoding: bool=False,
                     train_test: bool=True, split_rate: float=0.8,
                     cv: bool=False, n_fold: int=5,
                     shuffle: bool=True):
+    '''This function prepares the data in such a way that it is ready to train an ML algorithm.'''
 
-                    '''This function prepares the data in such a way that it is ready to train an ML algorithm.
+    label_column = data.columns[Y_col]
+    feature_columns = data.columns.drop(label_column)
 
-                    Parameters:
-                    > data: data as DataFrame
-                    > Y_col: column index number of labels (default is -1)
-                    > StandardScaler: if True (default) data has to be standardized through the StandardScaler
-                    > OneHotEncoder: if True (default is False) labels have to be one-hot-encoded
-                    > train_test: if True (default) the dataset has to be split in train and test set
-                    > test_size: it determines the size of the train test with respect to the whole dataset (default is 0.8)
-                    > cv: if True (default is False) K-Folds cross-validator object is created
-                    > n_fold: number of splitting iterations in the cross-validator
-                    > shuffle: Whether to shuffle the data during train_test_split and cross_validation (default is True)
-                    '''
-                    # Initialize variables
-                    Y = data.iloc[:,Y_col].values
-                    X = data.iloc[: ,:-1].values
-                    kf = None
-                    encoder = None
+    X_df = data.loc[:, feature_columns]
+    Y_series = data.loc[:, label_column]
 
-                    if standard_scaler==True:
-                        scaler = StandardScaler()
-                        X = scaler.fit_transform(X)
+    kf = None
+    encoder = None
 
-                    if one_hot_encoding==True:
-                        encoder = OneHotEncoder()
-                        Y = encoder.fit_transform(np.array(Y).reshape(-1,1)).toarray()
-                        dump(encoder, 'checkpoints/encoder.joblib') 
+    if standard_scaler:
+        scaler = StandardScaler()
+        X_processed = scaler.fit_transform(X_df.values)
+    else:
+        X_processed = X_df.values
 
-                    if train_test==True:
-                        x_train, x_test, y_train, y_test = train_test_split(X, Y, random_state=0, 
-                                                                            shuffle = shuffle, 
-                                                                            train_size = split_rate)
-                        if cv==True:
-                            kf = KFold(n_splits=n_fold, shuffle=shuffle, random_state=None)
-                        
-                        pd.DataFrame(x_train).to_csv('checkpoints/x_train.csv', index=False)
-                        pd.DataFrame(y_train).to_csv('checkpoints/y_train.csv', index=False)
-                        pd.DataFrame(x_test).to_csv('checkpoints/x_test.csv', index=False)
-                        pd.DataFrame(y_test).to_csv('checkpoints/y_test.csv', index=False)
-                        return x_train, x_test, y_train, y_test, kf
-                    else:
-                        if cv==True:
-                            kf = KFold(n_splits=n_fold, shuffle=shuffle, random_state=None)
+    if one_hot_encoding:
+        encoder = OneHotEncoder()
+        Y_processed = encoder.fit_transform(np.array(Y_series).reshape(-1, 1)).toarray()
+        os.makedirs('checkpoints', exist_ok=True)
+        dump(encoder, 'checkpoints/encoder.joblib')
+    else:
+        Y_processed = Y_series.values
 
-                        X.to_csv('out/X.csv', index=False)
-                        Y.to_csv('out/Y.csv', index=False)
-                        return X, Y, kf
+    if train_test:
+        x_train, x_test, y_train, y_test = train_test_split(
+            X_processed,
+            Y_processed,
+            random_state=0,
+            shuffle=shuffle,
+            train_size=split_rate,
+        )
+        if cv:
+            kf = KFold(n_splits=n_fold, shuffle=shuffle, random_state=None)
+
+        os.makedirs('checkpoints', exist_ok=True)
+        pd.DataFrame(x_train).to_csv('checkpoints/x_train.csv', index=False)
+        pd.DataFrame(y_train).to_csv('checkpoints/y_train.csv', index=False)
+        pd.DataFrame(x_test).to_csv('checkpoints/x_test.csv', index=False)
+        pd.DataFrame(y_test).to_csv('checkpoints/y_test.csv', index=False)
+        return x_train, x_test, y_train, y_test, kf
+
+    if cv:
+        kf = KFold(n_splits=n_fold, shuffle=shuffle, random_state=None)
+
+    os.makedirs('out', exist_ok=True)
+    X_out = pd.DataFrame(X_processed, columns=feature_columns)
+
+    if one_hot_encoding and encoder is not None:
+        label_names = [f"{label_column}_{cat}" for cat in encoder.categories_[0]]
+        Y_out = pd.DataFrame(Y_processed, columns=label_names)
+    else:
+        Y_out = pd.DataFrame(np.asarray(Y_processed).reshape(-1, 1), columns=[label_column])
+
+    X_out.to_csv('out/X.csv', index=False)
+    Y_out.to_csv('out/Y.csv', index=False)
+
+    return X_out, Y_out, kf
 
 
 def label_manager(data: pd.core.frame.DataFrame, Y_col: int=-1,
