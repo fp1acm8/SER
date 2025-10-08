@@ -78,7 +78,7 @@ def get_features(path, noise: bool, stretch_pitch: bool, shift: bool):
 
     # data with shift
     if (shift==True):
-        shift_data = da.stretch(y)
+        shift_data = da.shift(y)
         res4 = extract_features(shift_data, sr)
         result = np.vstack((result, res4)) # stacking vertically
 
