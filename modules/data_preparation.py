@@ -162,18 +162,24 @@ def data_preparation(data: pd.core.frame.DataFrame, Y_col: int=-1,
 
 
 def label_manager(data: pd.core.frame.DataFrame, Y_col: int=-1,
-                 delate: list=[], rename: dict={}):
+                 delate: list=None, rename: dict=None):
     '''Managing labels of a DataFrame.
 
     Parameters:
     > data: data as DataFrame
     > Y_col: column index number of labels (default is -1)
-    > delate: list of labels to be removed
-    > rename: dictionary of labels to be replaced with new names
+    > delate: list of labels to be removed (default is None, treated as empty list)
+    > rename: dictionary of labels to be replaced with new names (default is None, treated as empty dict)
     '''
 
     # Select labels
     Y = data.iloc[:,Y_col]
+
+    if delate is None:
+        delate = []
+
+    if rename is None:
+        rename = {}
 
     # Delate rows with unwanted labels
     if len(delate)!=0 :
